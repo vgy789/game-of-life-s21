@@ -1,71 +1,82 @@
 // gcc game_of_life.c -lncurses
-
 #include <ncurses.h>
 #include <stdio.h>
 
 #define N (25)
 #define M (80)
 
-#define DIED ' '
-#define LIVE '#'
+#define PRINT_DELAY 2000
 
-#define PRINT_DELAY 1000
+#define DIED (' ')
+#define DIED_TAG ('D')
+#define LIVE ('O')
+#define LIVE_TAG ('L')
 
-//void makeField(void);
+// void makeField(void);
 void initncurses(void);
-void printField(int field[][M]);
+void print_field(char field[][M]);
+int count_neighbors(char field[][M], int y, int x);
+void init_field(char field[][M]);
+void play_iteration(char field[][M]);
 
 int main(void) {
-
-    int field[N][M];
-    for (int row = 0; row < N-1; ++row) {
-        for (int col = 0; col < M-1; ++col) {
-            field[row][col] = 0;
-        }
-    }
-
-
-    // field[4][4] = 1;
-    // field[5][4] = 1;
-    // field[4][5] = 1;
-    int number;
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
-            scanf("%d", &number);
-            if (number == 1) {
-                field[i][j] = 1;
-            }
-        }
-    }
-
-    freopen("/dev/tty","r",stdin);
-
-
+    char field[N][M];
+    init_field(field);
     initncurses();
     int key_pressed = -1;
 
     do {
         clear();
-        printField(field);
+        print_field(field);
         refresh();
+        play_iteration(field);
 
         key_pressed = getch();
         if (key_pressed != -1) {
-
+            // управление скоростью
         }
     } while (key_pressed != 'q');
-    refresh();
+
     endwin();
     return 0;
 }
 
-// void makeField(void) {
-//     for (int row = 0; row < N-1; ++row) {
-//         for (int col = 0; col < M-1; ++col) {
-//             field[row][col] = 0;
-//         }
-//     }
-// }
+void play_iteration(char field[][M]) {
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            int neighbors = count_neighbors(field, row, col);
+            if (field[row][col] == DIED && neighbors == 3) {
+                field[row][col] = LIVE_TAG;
+            }
+
+            if (field[row][col] == LIVE && (neighbors != 2 && neighbors != 3)) {
+                field[row][col] = DIED_TAG;
+            }
+        }
+    }
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            if (field[row][col] == DIED_TAG) {
+                field[row][col] = DIED;
+            } else if (field[row][col] == LIVE_TAG) {
+                field[row][col] = LIVE;
+            }
+        }
+    }
+}
+
+int count_neighbors(char field[][M], int y, int x) {
+    int count = 0;
+    for (int row = y - 1; row <= y + 1; ++row) {
+        for (int col = x - 1; col <= x + 1; ++col) {
+            _Bool test1 = field[(row + N) % N][(col + M) % M] == LIVE;
+            _Bool test2 = field[(row + N) % N][(col + M) % M] == DIED_TAG;
+
+            count += test1 || test2 && (!(y == row && x == col));
+        }
+    }
+    return count;
+}
 
 void initncurses(void) {
     initscr();
@@ -75,23 +86,48 @@ void initncurses(void) {
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
-
     // init_pair(1, COLOR_RED, COLOR_RED);
     // init_pair(2, COLOR_CYAN, COLOR_CYAN);
     // init_pair(3, COLOR_YELLOW, COLOR_YELLOW);
     // init_pair(4, COLOR_GREEN, COLOR_GREEN);
-    // init_pair(5, -1, -1);
 }
 
-void printField(int field[][M]) {
-    for (int row = 0; row < N-1; ++row) {
-        for (int col = 0; col < M-1; ++col) {
-            if (field[row][col] == 0) {
-                printw("%c", DIED);
-            } else {
-                printw("%c", LIVE);
-            }
+void print_field(char field[][M]) {
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            printw("%c", field[row][col]);
         }
         printw("\n");
     }
+}
+
+void init_field(char field[][M]) {
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            field[row][col] = DIED;
+        }
+    }
+
+    // field[3][0] = 1;
+    // field[4][0] = 1;
+    // field[5][0] = 1;
+
+    // field[3][M - 1] = 1;
+    // field[4][M - 1] = 1;
+    // field[5][M - 1] = 1;
+
+    // field[3][M - 2] = 1;
+    // field[4][M - 2] = 1;
+    // field[5][M - 2] = 1;
+
+    int number;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            scanf("%d", &number);
+            if (number == 1) {
+                field[i][j] = LIVE;
+            }
+        }
+    }
+    freopen("/dev/tty", "r", stdin);
 }
