@@ -2,6 +2,8 @@
 #include <ncurses.h>
 #include <stdio.h>
 
+// ЛОГИКА ДО КОНЦА НЕ ДОДЕЛАНА Я ПОШЁЛ СПАТЬ
+
 #define N (25)
 #define M (80)
 
@@ -12,7 +14,6 @@
 #define LIVE ('O')
 #define LIVE_TAG ('L')
 
-// void makeField(void);
 void initncurses(void);
 void print_field(char field[][M]);
 int count_neighbors(char field[][M], int y, int x);
@@ -22,6 +23,7 @@ void play_iteration(char field[][M]);
 int main(void) {
     char field[N][M];
     init_field(field);
+
     initncurses();
     int key_pressed = -1;
 
@@ -129,6 +131,9 @@ void init_field(char field[][M]) {
             scanf("%d", &number);
             if (number == 1) {
                 field[i][j] = LIVE;
+            } else if(number != 0) {
+                printw("The file is damaged");
+                break;// нельзя break!
             }
         }
     }
