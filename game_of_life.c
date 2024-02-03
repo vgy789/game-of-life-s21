@@ -11,10 +11,12 @@
 
 #define PRINT_DELAY 1000
 
+//void makeField(void);
 void initncurses(void);
 void printField(int field[][M]);
 
 int main(void) {
+
     int field[N][M];
     for (int row = 0; row < N-1; ++row) {
         for (int col = 0; col < M-1; ++col) {
@@ -22,10 +24,23 @@ int main(void) {
         }
     }
 
-    field[4][4] = 1;
-    field[5][4] = 1;
-    field[4][5] = 1;
-    
+
+    // field[4][4] = 1;
+    // field[5][4] = 1;
+    // field[4][5] = 1;
+    int number;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            scanf("%d", &number);
+            if (number == 1) {
+                field[i][j] = 1;
+            }
+        }
+    }
+
+    freopen("/dev/tty","r",stdin);
+
+
     initncurses();
     int key_pressed = -1;
 
@@ -39,10 +54,18 @@ int main(void) {
 
         }
     } while (key_pressed != 'q');
-
+    refresh();
     endwin();
     return 0;
 }
+
+// void makeField(void) {
+//     for (int row = 0; row < N-1; ++row) {
+//         for (int col = 0; col < M-1; ++col) {
+//             field[row][col] = 0;
+//         }
+//     }
+// }
 
 void initncurses(void) {
     initscr();
