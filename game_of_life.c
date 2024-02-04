@@ -116,18 +116,6 @@ int init_field(char field[][M]) {
         }
     }
 
-    // field[3][0] = 1;
-    // field[4][0] = 1;
-    // field[5][0] = 1;
-
-    // field[3][M - 1] = 1;
-    // field[4][M - 1] = 1;
-    // field[5][M - 1] = 1;
-
-    // field[3][M - 2] = 1;
-    // field[4][M - 2] = 1;
-    // field[5][M - 2] = 1;
-
     int number, counter = 0, is_ok = 1;
     char c;
     for (int i = 0; i < N; i++) {
@@ -159,7 +147,7 @@ int init_field(char field[][M]) {
         }
     if (is_ok != 0 && counter != 2000) {
         is_ok = 0;
-        printf("The file is damaged. Error type: the file contains more symbols than needs");
+        printf("The file is damaged. Error type: the file contains more or less symbols than needs");
     }
     freopen("/dev/tty", "r", stdin);
     return is_ok;
