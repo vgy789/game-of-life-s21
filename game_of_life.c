@@ -14,6 +14,8 @@
 #define DIED_TAG ('d')
 #define LIVE_TAG ('a')
 
+void print_field(char field[][M]);
+int count_neighbors(char field[][M], int y, int x);
 void init_ncurses(void);
 void print_start();  // печатать интро игры
 int init_field(char field[][M]);
@@ -21,6 +23,7 @@ void play_iteration(char field[][M]);
 int count_neighbors(char field[][M], int y, int x);
 
 void print_intro(void);
+void pause_game(void);
 
 void print_field(char field[][M]);
 void copy_field(char dst[][M], const char src[][M]);
@@ -33,33 +36,37 @@ int main(void) {
     int gameover = 0;
 
     int is_loaded = init_field(field);
-    if (!is_loaded) key_pressed = 'q';
 
-    init_ncurses();
-    print_intro();
-    getch();
+    if (is_loaded) {
+        init_ncurses();
 
-    while (key_pressed != 'q' && key_pressed != 'Q' && !gameover) {
-        clear();
         print_field(field);
-        refresh();
+        printw("\t\t\t\tPress any Key to Start...");
+        pause_game();
 
-        copy_field(prev_field, field);
-        play_iteration(field);
+        while (key_pressed != 'q' && key_pressed != 'Q' && !gameover) {
+            clear();
+            print_field(field);
+            refresh();
 
-        gameover = isgameover(field, prev_field);
+            copy_field(prev_field, field);
+            play_iteration(field);
 
-        key_pressed = getch();
-        if (key_pressed != -1) {
-            // управление скоростью
+            gameover = isgameover(field, prev_field);
+
+            key_pressed = getch();
+            if (key_pressed != -1) {
+                // управление скоростью
+            }
         }
-    }
-    if (gameover) {
-        printw("\t\t\t\tGAME OVER");
-        getch();
+        if (gameover) {
+            printw("\t\t\t\tGAME OVER");
+            pause_game();
+        }
+
+        endwin();
     }
 
-    endwin();
     return 0;
 }
 
@@ -70,8 +77,12 @@ void print_intro(void) {
     printw("G)    gg  a)AAA  m)  MM  MM e)EEEE     O)    oo f)        L)       i) f)     e)EEEE  \n");
     printw(" G)   gg a)   A  m)  MM  MM e)         O)    oo f)        L)       i) f)     e)      \n");
     printw("  G)ggg   a)AAAA m)      MM  e)EEEE     O)oooo  f)        L)llllll i) f)      e)EEEE \n\n");
+}
 
-    printw("\t\t\t\tPress Any Key... ");
+void pause_game(void) {
+    timeout(-1);
+    getch();
+    timeout(PRINT_DELAY);
 }
 
 int isgameover(char field[][M], char prev_field[][M]) {
@@ -156,21 +167,41 @@ int init_field(char field[][M]) {
             field[row][col] = DIED;
         }
     }
-
-    int number;
+    int number, counter = 0, is_ok = 1;
+    char c;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
-                printf("The file is damaged");
-                return 0;
-            } else if (number == 1) {
-                field[i][j] = LIVE;
+            if (is_ok != 0 && j == 79 && i < 24) {
+                if ((scanf("%d%c", &number, &c) != 2 || c != '\n') || (number != 1 && number != 0)) {
+                    is_ok = 0;
+                    printf("The file is damaged. Error type: there is something after the last symbol in a string");
+                } else if (number == 1) {
+                    field[i][j] = LIVE;
+                }
+            } else if (is_ok != 0 && j == 79 && i == 24) {
+                if ((scanf("%d%c", &number, &c) != 1 || (number != 1 && number != 0))) {
+                    is_ok = 0;
+                    printf("The file is damaged. Error type: there is something after the last symbol in a string");
+                }
+            } else if (is_ok != 0) {
+                if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
+                    is_ok = 0;
+                    printf("The file is damaged. Error type: forbbidden symbol");
+                } else if (number == 1) {
+                    field[i][j] = LIVE;
+                }
             }
+            counter++;
         }
     }
-    if (freopen("/dev/tty", "r", stdin))
-        ;
-    return 1;
+    if (is_ok != 0 && counter != 2000) {
+        is_ok = 0;
+        printf("The file is damaged. Error type: the file contains more or less symbols than needs");
+    }
+
+    is_ok = (freopen("/dev/tty", "r", stdin) != NULL);
+
+    return is_ok;
 }
 
 void copy_field(char dst[][M], const char src[][M]) {
