@@ -1,6 +1,7 @@
 // gcc game_of_life.c -lncurses
 #include <ncurses.h>
 #include <stdio.h>
+#include <ctype.h>
 
 // ЛОГИКА ДО КОНЦА НЕ ДОДЕЛАНА Я ПОШЁЛ СПАТЬ
 
@@ -17,7 +18,7 @@
 void initncurses(void);
 void print_field(char field[][M]);
 int count_neighbors(char field[][M], int y, int x);
-bool init_field(char field[][M]);
+int init_field(char field[][M]);
 void play_iteration(char field[][M]);
 
 int main(void) {
@@ -108,7 +109,7 @@ void print_field(char field[][M]) {
     }
 }
 
-bool init_field(char field[][M]) {
+int init_field(char field[][M]) {
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             field[row][col] = DIED;
@@ -127,17 +128,39 @@ bool init_field(char field[][M]) {
     // field[4][M - 2] = 1;
     // field[5][M - 2] = 1;
 
-    int number;
+    int number, counter = 0, is_ok = 1;
+    char c;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
-                printf("The file is damaged");
-                return false;
-            }   else if (number == 1){
-                field[i][j] = LIVE;
+            if (is_ok != 0 && j == 79 && i < 24) { //проверка на то что после строки (всех кроме последней) идет \n
+                if ((scanf("%d%c", &number, &c) != 2 || c != '\n') || (number != 1 && number != 0)) {
+                is_ok = 0;
+                printf("The file is damaged. Error type: there is something after the last symbol in a string");
+                }   else if (number == 1){
+                        field[i][j] = LIVE;
+                    }
+            }   
+            else if (is_ok != 0 && j == 79 && i == 24) { //проверка на то что после последней строки ничего не идет
+                if ((scanf("%d%c", &number, &c) != 1 || (number != 1 && number != 0))) {
+                    is_ok = 0;
+                    printf("The file is damaged. Error type: there is something after the last symbol in a string");
+                }    
+            }
+            else if(is_ok != 0) { //проверка на тип int и на то что число равно 1 или 0
+                if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
+                    is_ok = 0;
+                    printf("The file is damaged. Error type: forbbidden symbol");
+                }   else if (number == 1) {
+                        field[i][j] = LIVE;
+                    }
+            }
+            counter++;
             }
         }
+    if (is_ok != 0 && counter != 2000) {
+        is_ok = 0;
+        printf("The file is damaged. Error type: the file contains more symbols than needs");
     }
     freopen("/dev/tty", "r", stdin);
-    return true;
+    return is_ok;
 }
