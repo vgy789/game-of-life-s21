@@ -1,7 +1,6 @@
 // gcc game_of_life.c -lncurses
 #include <ncurses.h>
 #include <stdio.h>
-#include <ctype.h>
 
 // ЛОГИКА ДО КОНЦА НЕ ДОДЕЛАНА Я ПОШЁЛ СПАТЬ
 
@@ -33,11 +32,10 @@ int main(void) {
     char prev_field[N][M];
 
     int is_loaded = init_field(field);
-    if (!is_loaded) key_pressed == 'q';
+    if (is_loaded) {
+        init_ncurses();
 
-    init_ncurses();
-
-    while (key_pressed != 'q' && key_pressed != 'Q' && !isgameover(field)) {
+        while (key_pressed != 'q' && key_pressed != 'Q' && !isgameover(field)) {
         clear();
         print_field(field);
         refresh();
@@ -49,9 +47,10 @@ int main(void) {
         if (key_pressed != -1) {
             // управление скоростью
         }
-    }
+        }
+        endwin();
+    }   
 
-    endwin();
     return 0;
 }
 
