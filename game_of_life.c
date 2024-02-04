@@ -120,7 +120,7 @@ int init_field(char field[][M]) {
     char c;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            if (is_ok != 0 && j == 79 && i < 24) { //проверка на то что после строки (всех кроме последней) идет \n
+            if (is_ok != 0 && j == 79 && i < 24) {
                 if ((scanf("%d%c", &number, &c) != 2 || c != '\n') || (number != 1 && number != 0)) {
                 is_ok = 0;
                 printf("The file is damaged. Error type: there is something after the last symbol in a string");
@@ -128,13 +128,13 @@ int init_field(char field[][M]) {
                         field[i][j] = LIVE;
                     }
             }   
-            else if (is_ok != 0 && j == 79 && i == 24) { //проверка на то что после последней строки ничего не идет
+            else if (is_ok != 0 && j == 79 && i == 24) {
                 if ((scanf("%d%c", &number, &c) != 1 || (number != 1 && number != 0))) {
                     is_ok = 0;
                     printf("The file is damaged. Error type: there is something after the last symbol in a string");
                 }    
             }
-            else if(is_ok != 0) { //проверка на тип int и на то что число равно 1 или 0
+            else if(is_ok != 0) {
                 if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
                     is_ok = 0;
                     printf("The file is damaged. Error type: forbbidden symbol");
