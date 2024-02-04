@@ -10,37 +10,43 @@
 #define PRINT_DELAY 2000
 
 #define DIED (' ')
-#define DIED_TAG ('D')
-#define LIVE ('O')
-#define LIVE_TAG ('L')
+#define DIED_TAG ('d')
 
-void initncurses(void);
-void print_field(char field[][M]);
-int count_neighbors(char field[][M], int y, int x);
+#define LIVE ('O')
+#define LIVE_TAG ('l')
+
+void init_ncurses(void);
+void print_start(); // печатать интро игры
 void init_field(char field[][M]);
 void play_iteration(char field[][M]);
+int count_neighbors(char field[][M], int y, int x);
+
+void print_field(char field[][M]);
+void copy_field(char dst[][M], const char src[][M]);
+int isgameover(char field[][M]);
 
 int main(void) {
     char field[N][M];
+    char prev_field[N][M];
+
     init_field(field);
 
-    initncurses();
+    init_ncurses();
     int key_pressed = -1;
 
     do {
         clear();
         print_field(field);
         refresh();
+
+        copy_field(prev_field, field);
         play_iteration(field);
-
-
 
         key_pressed = getch();
         if (key_pressed != -1) {
             // управление скоростью
         }
-        
-    } while (key_pressed != 'q');
+    } while (key_pressed != 'q' && key_pressed != 'Q');
 
     endwin();
     return 0;
@@ -83,7 +89,7 @@ int count_neighbors(char field[][M], int y, int x) {
     return count;
 }
 
-void initncurses(void) {
+void init_ncurses(void) {
     initscr();
     // start_color();
     cbreak();
@@ -138,4 +144,12 @@ void init_field(char field[][M]) {
         }
     }
     freopen("/dev/tty", "r", stdin);
+}
+
+void copy_field(char dst[][M], const char src[][M]) {
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            dst[row][col] = src[row][col];
+        }
+    }
 }
