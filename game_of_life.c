@@ -10,10 +10,9 @@
 #define PRINT_DELAY 2000
 
 #define DIED (' ')
-#define DIED_TAG ('d')
-
 #define LIVE ('O')
-#define LIVE_TAG ('l')
+#define DIED_TAG ('d')
+#define LIVE_TAG ('a')
 
 void init_ncurses(void);
 void print_start(); // печатать интро игры
@@ -46,9 +45,13 @@ int main(void) {
         if (key_pressed != -1) {
             // управление скоростью
         }
-    } while (key_pressed != 'q' && key_pressed != 'Q');
+    } while (key_pressed != 'q' && key_pressed != 'Q' && !isgameover(field));
 
     endwin();
+    return 0;
+}
+
+int isgameover(char field[][M]) {
     return 0;
 }
 
@@ -56,15 +59,18 @@ void play_iteration(char field[][M]) {
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             int neighbors = count_neighbors(field, row, col);
-            if (field[row][col] == DIED && neighbors == 3) {
+            if (field[row][col] == LIVE && (neighbors == 2 || neighbors == 3)) {
+                field[row][col] = LIVE;
+            } else if (field[row][col] == DIED && neighbors == 3) {
                 field[row][col] = LIVE_TAG;
-            }
-
-            if (field[row][col] == LIVE && (neighbors != 2 && neighbors != 3)) {
+            } else if ((field[row][col] == LIVE) && (neighbors < 2 || neighbors > 3)) {
                 field[row][col] = DIED_TAG;
+            } else {
+                field[row][col] = DIED;
             }
         }
     }
+
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             if (field[row][col] == DIED_TAG) {
@@ -83,7 +89,7 @@ int count_neighbors(char field[][M], int y, int x) {
             _Bool test1 = field[(row + N) % N][(col + M) % M] == LIVE;
             _Bool test2 = field[(row + N) % N][(col + M) % M] == DIED_TAG;
 
-            count += test1 || test2 && (!(y == row && x == col));
+            count += (test1 || test2) && (!(y == row && x == col));
         }
     }
     return count;
@@ -93,7 +99,7 @@ void init_ncurses(void) {
     initscr();
     // start_color();
     cbreak();
-    timeout(PRINT_DELAY);
+    //timeout(PRINT_DELAY);
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
