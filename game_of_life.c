@@ -11,57 +11,70 @@
 #define PRINT_DELAY 2000
 
 #define DIED (' ')
-#define DIED_TAG ('D')
 #define LIVE ('O')
-#define LIVE_TAG ('L')
+#define DIED_TAG ('d')
+#define LIVE_TAG ('a')
 
-void initncurses(void);
 void print_field(char field[][M]);
 int count_neighbors(char field[][M], int y, int x);
+void init_ncurses(void);
+
 int init_field(char field[][M]);
 void play_iteration(char field[][M]);
+int count_neighbors(char field[][M], int y, int x);
+
+void print_field(char field[][M]);
+void copy_field(char dst[][M], const char src[][M]);
+int isgameover(char field[][M]);
 
 int main(void) {
+    int key_pressed = -1;
     char field[N][M];
-    if (init_field(field)) {
-        initncurses();
-        int key_pressed = -1;
+    char prev_field[N][M];
 
-        do {
-            clear();
-            print_field(field);
-            refresh();
-            play_iteration(field);
+    int is_loaded = init_field(field);
+    if (!is_loaded) key_pressed == 'q';
 
+    init_ncurses();
 
+    while (key_pressed != 'q' && key_pressed != 'Q' && !isgameover(field)) {
+        clear();
+        print_field(field);
+        refresh();
 
-            key_pressed = getch();
-            if (key_pressed != -1) {
-                // управление скоростью
-            }
-            
-        } while (key_pressed != 'q');
+        copy_field(prev_field, field);
+        play_iteration(field);
 
-        endwin();
-        return 0; 
-    }   else {
-        return 1;
+        key_pressed = getch();
+        if (key_pressed != -1) {
+            // управление скоростью
+        }
     }
+
+    endwin();
+    return 0;
+}
+
+int isgameover(char field[][M]) {
+    return 0;
 }
 
 void play_iteration(char field[][M]) {
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             int neighbors = count_neighbors(field, row, col);
-            if (field[row][col] == DIED && neighbors == 3) {
+            if (field[row][col] == LIVE && (neighbors == 2 || neighbors == 3)) {
+                field[row][col] = LIVE;
+            } else if (field[row][col] == DIED && neighbors == 3) {
                 field[row][col] = LIVE_TAG;
-            }
-
-            if (field[row][col] == LIVE && (neighbors != 2 && neighbors != 3)) {
+            } else if ((field[row][col] == LIVE) && (neighbors < 2 || neighbors > 3)) {
                 field[row][col] = DIED_TAG;
+            } else {
+                field[row][col] = DIED;
             }
         }
     }
+
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             if (field[row][col] == DIED_TAG) {
@@ -80,17 +93,17 @@ int count_neighbors(char field[][M], int y, int x) {
             _Bool test1 = field[(row + N) % N][(col + M) % M] == LIVE;
             _Bool test2 = field[(row + N) % N][(col + M) % M] == DIED_TAG;
 
-            count += test1 || test2 && (!(y == row && x == col));
+            count += (test1 || test2) && (!(y == row && x == col));
         }
     }
     return count;
 }
 
-void initncurses(void) {
+void init_ncurses(void) {
     initscr();
     // start_color();
     cbreak();
-    timeout(PRINT_DELAY);
+    //timeout(PRINT_DELAY);
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
@@ -115,7 +128,6 @@ int init_field(char field[][M]) {
             field[row][col] = DIED;
         }
     }
-
     int number, counter = 0, is_ok = 1;
     char c;
     for (int i = 0; i < N; i++) {
@@ -151,4 +163,12 @@ int init_field(char field[][M]) {
     }
     freopen("/dev/tty", "r", stdin);
     return is_ok;
+}
+
+void copy_field(char dst[][M], const char src[][M]) {
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            dst[row][col] = src[row][col];
+        }
+    }
 }
