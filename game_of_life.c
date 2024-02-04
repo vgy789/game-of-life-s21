@@ -22,7 +22,6 @@ int init_field(char field[][M]);
 void play_iteration(char field[][M]);
 int count_neighbors(char field[][M], int y, int x);
 
-void print_intro(void);
 void pause_game(void);
 
 void print_field(char field[][M]);
@@ -30,14 +29,15 @@ void copy_field(char dst[][M], const char src[][M]);
 int isgameover(char field[][M], char prev_field[][M]);
 
 int main(void) {
-    int key_pressed = -1;
     char field[N][M];
-    char prev_field[N][M];
-    int gameover = 0;
 
     int is_loaded = init_field(field);
 
     if (is_loaded) {
+        char prev_field[N][M];
+        int key_pressed = -1;
+        int gameover = 0;
+
         init_ncurses();
 
         print_field(field);
@@ -68,15 +68,6 @@ int main(void) {
     }
 
     return 0;
-}
-
-void print_intro(void) {
-    printw("  G)gggg                                O)oooo   f)FFF    L)       ##  f)FFF         \n");
-    printw(" G)                                    O)    oo f)        L)          f)             \n");
-    printw("G)  ggg  a)AAAA   m)MM MMM  e)EEEEE    O)    oo f)FFF     L)       i) f)FFF  e)EEEEE \n");
-    printw("G)    gg  a)AAA  m)  MM  MM e)EEEE     O)    oo f)        L)       i) f)     e)EEEE  \n");
-    printw(" G)   gg a)   A  m)  MM  MM e)         O)    oo f)        L)       i) f)     e)      \n");
-    printw("  G)ggg   a)AAAA m)      MM  e)EEEE     O)oooo  f)        L)llllll i) f)      e)EEEE \n\n");
 }
 
 void pause_game(void) {
@@ -174,14 +165,18 @@ int init_field(char field[][M]) {
             if (is_ok != 0 && j == 79 && i < 24) {
                 if ((scanf("%d%c", &number, &c) != 2 || c != '\n') || (number != 1 && number != 0)) {
                     is_ok = 0;
-                    printf("The file is damaged. Error type: there is something after the last symbol in a string");
+                    printf(
+                        "The file is damaged. Error type: there is something after the last symbol in a "
+                        "string");
                 } else if (number == 1) {
                     field[i][j] = LIVE;
                 }
             } else if (is_ok != 0 && j == 79 && i == 24) {
                 if ((scanf("%d%c", &number, &c) != 1 || (number != 1 && number != 0))) {
                     is_ok = 0;
-                    printf("The file is damaged. Error type: there is something after the last symbol in a string");
+                    printf(
+                        "The file is damaged. Error type: there is something after the last symbol in a "
+                        "string");
                 }
             } else if (is_ok != 0) {
                 if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
