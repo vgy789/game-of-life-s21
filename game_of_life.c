@@ -17,33 +17,35 @@
 void initncurses(void);
 void print_field(char field[][M]);
 int count_neighbors(char field[][M], int y, int x);
-void init_field(char field[][M]);
+bool init_field(char field[][M]);
 void play_iteration(char field[][M]);
 
 int main(void) {
     char field[N][M];
-    init_field(field);
+    if (init_field(field)) {
+        initncurses();
+        int key_pressed = -1;
 
-    initncurses();
-    int key_pressed = -1;
-
-    do {
-        clear();
-        print_field(field);
-        refresh();
-        play_iteration(field);
-
+        do {
+            clear();
+            print_field(field);
+            refresh();
+            play_iteration(field);
 
 
-        key_pressed = getch();
-        if (key_pressed != -1) {
-            // управление скоростью
-        }
-        
-    } while (key_pressed != 'q');
 
-    endwin();
-    return 0;
+            key_pressed = getch();
+            if (key_pressed != -1) {
+                // управление скоростью
+            }
+            
+        } while (key_pressed != 'q');
+
+        endwin();
+        return 0; 
+    }   else {
+        return 1;
+    }
 }
 
 void play_iteration(char field[][M]) {
@@ -106,7 +108,7 @@ void print_field(char field[][M]) {
     }
 }
 
-void init_field(char field[][M]) {
+bool init_field(char field[][M]) {
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             field[row][col] = DIED;
@@ -128,14 +130,14 @@ void init_field(char field[][M]) {
     int number;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            scanf("%d", &number);
-            if (number == 1) {
+            if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
+                printf("The file is damaged");
+                return false;
+            }   else if (number == 1){
                 field[i][j] = LIVE;
-            } else if(number != 0) {
-                printw("The file is damaged");
-                break;// нельзя break!
             }
         }
     }
     freopen("/dev/tty", "r", stdin);
+    return true;
 }
