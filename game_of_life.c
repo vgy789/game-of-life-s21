@@ -29,8 +29,7 @@ int isgameover(char field[][M], char prev_field[][M]);
 
 int game_speed(int game_delay, int key_pressed);
 
-int main(void)
-{
+int main(void) {
     int game_delay = PRINT_DELAY;
     char field[N][M];
 
@@ -48,8 +47,7 @@ int main(void)
         printw("\t\t\t\tPress any Key to Start...");
         pause_game();
 
-        while (key_pressed != 'q' && key_pressed != 'Q' && !gameover)
-        {
+        while (key_pressed != 'q' && key_pressed != 'Q' && !gameover) {
             clear();
             print_field(field);
             refresh();
@@ -280,4 +278,4 @@ int main(void)
             break;
     }
     return game_delay;
-    }
+}
