@@ -1,24 +1,18 @@
-// gcc game_of_life.c -lncurses
 #include <ncurses.h>
 #include <stdio.h>
-
-// ЛОГИКА ДО КОНЦА НЕ ДОДЕЛАНА Я ПОШЁЛ СПАТЬ
 
 #define N (25)
 #define M (80)
 
-#define PRINT_DELAY 300
+#define PRINT_DELAY (50)
 
 #define DIED (' ')
 #define LIVE ('O')
 #define DIED_TAG ('d')
 #define LIVE_TAG ('a')
 
-#define MSG_ANYKEY ("\t\t\t\tPress any Key to Start...")
-#define MSG_GAMEOVER ("\t\t\t\tGAME OVER")
-
 int init_field(char field[][M]);
-void play_game(char field[][M]);
+void start_game(char field[][M]);
 
 void init_ncurses(void);
 void print_field(char field[][M]);
@@ -27,60 +21,17 @@ void pause_game(void);
 int count_neighbors(char field[][M], int y, int x);
 void play_iteration(char field[][M]);
 
-void print_field(char field[][M]);
 void copy_field(char dst[][M], const char src[][M]);
 int isgameover(char field[][M], char prev_field[][M]);
 
+int game_speed_control(int game_delay, int key_pressed);
+
 int main(void) {
     char field[N][M];
-
     int is_loaded = init_field(field);
     if (is_loaded) {
-        play_game(field);
+        start_game(field);
     }
-
-    return 0;
-}
-
-void play_game(char field[][M]) {
-    char prev_field[N][M];
-    int key_pressed = -1;
-    int gameover = 0;
-
-    init_ncurses();
-
-    print_field(field);
-    printw(MSG_ANYKEY);
-    pause_game();
-
-    while (key_pressed != 'q' && key_pressed != 'Q' && !gameover) {
-        clear();
-        print_field(field);
-        refresh();
-
-        copy_field(prev_field, field);
-        play_iteration(field);
-
-        gameover = isgameover(field, prev_field);
-
-        key_pressed = getch();
-        if (key_pressed != -1) {
-            // управление скоростью
-        }
-    }
-
-    if (gameover) {
-        play_iteration(field);
-        clear();
-        print_field(field);
-
-        printw(MSG_GAMEOVER);
-        printw("\n");
-        printw(MSG_ANYKEY);
-        pause_game();
-    }
-
-    endwin();
 }
 
 void pause_game(void) {
@@ -166,12 +117,6 @@ void print_field(char field[][M]) {
 }
 
 int init_field(char field[][M]) {
-    for (int row = 0; row < N; ++row) {
-        for (int col = 0; col < M; ++col) {
-            field[row][col] = DIED;
-        }
-    }
-
     float number;
     int is_ok = 1, counter = 0;
     char sep;
@@ -212,4 +157,66 @@ void copy_field(char dst[][M], const char src[][M]) {
             dst[row][col] = src[row][col];
         }
     }
+}
+
+void start_game(char field[][M]) {
+    char prev_field[N][M];
+    int key_pressed = -1;
+    int gameover = 0;
+    int game_delay = PRINT_DELAY;
+
+    init_ncurses();
+
+    print_field(field);
+    printw("\t\t\t\tPress any Key to Start...");
+    pause_game();
+
+    while (key_pressed != 'q' && key_pressed != 'Q' && !gameover) {
+        clear();
+        print_field(field);
+        refresh();
+
+        copy_field(prev_field, field);
+        play_iteration(field);
+
+        gameover = isgameover(field, prev_field);
+
+        key_pressed = getch();
+        if (key_pressed != -1) {
+            int speed = game_speed_control(game_delay, key_pressed);
+            timeout(speed);
+        }
+    }
+
+    if (gameover) {
+        play_iteration(field);
+        clear();
+        print_field(field);
+
+        printw("\t\t\t\tGAME OVER");
+        pause_game();
+    }
+
+    endwin();
+}
+
+int game_speed_control(int game_delay, int key_pressed) {
+    switch (key_pressed) {
+        case '1':
+            game_delay -= 100;
+            break;
+        case '2':
+            game_delay -= 150;
+            break;
+        case '3':
+            game_delay -= 200;
+            break;
+        case '4':
+            game_delay -= 290;
+            break;
+        case ' ':
+            game_delay = -1;
+            break;
+    }
+    return game_delay;
 }
