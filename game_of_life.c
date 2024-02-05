@@ -118,53 +118,53 @@ void print_field(char field[][M]) {
     }
 }
 
-// int init_field(char field[][M]) {
-//     for (int row = 0; row < N; ++row) {
-//         for (int col = 0; col < M; ++col) {
-//             field[row][col] = DIED;
-//         }
-//     }
+int init_field(char field[][M]) {
+    for (int row = 0; row < N; ++row) {
+        for (int col = 0; col < M; ++col) {
+            field[row][col] = DIED;
+        }
+    }
 
-//     int number, counter = 0, is_ok = 1;
-//     char c;
-//     for (int row = 0; row < N; row++) {
-//         for (int col = 0; col < M; col++) {
+    int number, counter = 0, is_ok = 1;
+    char c;
+    for (int row = 0; row < N; row++) {
+        for (int col = 0; col < M; col++) {
+            if (is_ok != 0 && col == 79 && row < 24) {
+                if ((scanf("%d%c", &number, &c) != 2 || c != '\n') || (number != 1 && number != 0)) {
+                    is_ok = 0;
+                    printf(
+                        "The file is damaged. Error type: there is something after the last symbol in a "
+                        "string");
+                } else if (number == 1) {
+                    field[row][col] = LIVE;
+                }
+            } else if (is_ok != 0 && col == 79 && row == 24) {
+                if ((scanf("%d%c", &number, &c) != 1 || (number != 1 && number != 0))) {
+                    is_ok = 0;
+                    printf(
+                        "The file is damaged. Error type: there is something after the last symbol in a "
+                        "string");
+                }
+            } else if (is_ok != 0) {
+                if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
+                    is_ok = 0;
+                    printf("The file is damaged. Error type: forbbidden symbol");
+                } else if (number == 1) {
+                    field[row][col] = LIVE;
+                }
+            }
+            counter++;
+        }
+    }
+    if (is_ok != 0 && counter != 2000) {
+        is_ok = 0;
+        printf("The file is damaged. Error type: the file contains more or less symbols than needs");
+    }
 
-//             if (is_ok != 0 && col == 79 && row < 24) {
-//                 if ((scanf("%d%c", &number, &c) != 2 || c != '\n') || (number != 1 && number != 0)) {
-//                     is_ok = 0;
-//                     printf(
-//                         "The file is damaged. Error type: there is something after the last symbol in a
-//                         string");
-//                 } else if (number == 1) {
-//                     field[row][col] = LIVE;
-//                 }
-//             } else if (is_ok != 0 && col == 79 && row == 24) {
-//                 if ((scanf("%d%c", &number, &c) != 1 || (number != 1 && number != 0))) {
-//                     is_ok = 0;
-//                     printf("The file is damaged. Error type: there is something after the last symbol in a
-//                     string");
-//                 }
-//             } else if (is_ok != 0) {
-//                 if ((scanf("%d", &number) != 1) || (number != 1 && number != 0)) {
-//                     is_ok = 0;
-//                     printf("The file is damaged. Error type: forbbidden symbol");
-//                 } else if (number == 1) {
-//                     field[row][col] = LIVE;
-//                 }
-//             }
-//             counter++;
-//         }
-//     }
-//     if (is_ok != 0 && counter != 2000) {
-//         is_ok = 0;
-//         printf("The file is damaged. Error type: the file contains more or less symbols than needs");
-//     }
+    is_ok = (freopen("/dev/tty", "r", stdin) != NULL);
 
-//     is_ok = (freopen("/dev/tty", "r", stdin) != NULL);
-
-//     return is_ok;
-// }
+    return is_ok;
+}
 
 // int init_field(char field[][M]) {
 //     for (int row = 0; row < N; ++row) {
@@ -238,7 +238,7 @@ void start_game(char field[][M]) {
         copy_field(prev_field, field);
         play_iteration(field);
 
-        gameover = isgameover(field, prev_field);
+        //gameover = isgameover(field, prev_field);
 
         key_pressed = getch();
         if (key_pressed != -1) {
