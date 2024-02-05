@@ -4,7 +4,7 @@
 #define N (25)
 #define M (80)
 
-#define PRINT_DELAY (50)
+#define PRINT_DELAY (100)
 
 #define DIED (' ')
 #define LIVE ('O')
@@ -16,7 +16,7 @@ void start_game(char field[][M]);
 
 void init_ncurses(void);
 void print_field(char field[][M]);
-void pause_game(void);
+void pause_game(int game_delay);
 
 int count_neighbors(char field[][M], int y, int x);
 void play_iteration(char field[][M]);
@@ -28,20 +28,24 @@ int game_speed_control(int game_delay, int key_pressed);
 
 int main(void) {
     char field[N][M];
-    int is_loaded = init_field(field);
+    _Bool is_loaded = init_field(field);
+
     if (is_loaded) {
         start_game(field);
+    } else {
+        printf("The file is damaged!");
     }
+
+    return 0;
 }
 
-void pause_game(void) {
+void pause_game(int game_delay) {
     timeout(-1);
     getch();
-    timeout(PRINT_DELAY);
+    timeout(game_delay);
 }
 
 int isgameover(char field[][M], char prev_field[][M]) {
-    int is_out = 0;
     int matches = 0, live_count = 0;
     char next_field[N][M];
     copy_field(next_field, field);
@@ -54,7 +58,7 @@ int isgameover(char field[][M], char prev_field[][M]) {
         }
     }
 
-    is_out = (matches == N * M) || (live_count == 0);
+    _Bool is_out = (matches == N * M) || (live_count == 0);
 
     return is_out;
 }
@@ -63,6 +67,7 @@ void play_iteration(char field[][M]) {
     for (int row = 0; row < N; ++row) {
         for (int col = 0; col < M; ++col) {
             int neighbors = count_neighbors(field, row, col);
+
             if (field[row][col] == LIVE && (neighbors == 2 || neighbors == 3)) {
                 field[row][col] = LIVE;
             } else if (field[row][col] == DIED && neighbors == 3) {
@@ -90,8 +95,8 @@ int count_neighbors(char field[][M], int y, int x) {
     int count = 0;
     for (int row = y - 1; row <= y + 1; ++row) {
         for (int col = x - 1; col <= x + 1; ++col) {
-            _Bool test1 = field[(row + N) % N][(col + M) % M] == LIVE;
-            _Bool test2 = field[(row + N) % N][(col + M) % M] == DIED_TAG;
+            _Bool test1 = (field[(row + N) % N][(col + M) % M] == LIVE);
+            _Bool test2 = (field[(row + N) % N][(col + M) % M] == DIED_TAG);
 
             count += (test1 || test2) && (!(y == row && x == col));
         }
@@ -118,30 +123,27 @@ void print_field(char field[][M]) {
 
 int init_field(char field[][M]) {
     float number;
-    int is_ok = 1, counter = 0;
+    _Bool is_ok = 1;
     char sep;
     for (int row = 0; row < N && is_ok; row++) {
         for (int col = 0; col < M && is_ok; col++) {
             is_ok = (scanf("%f%c", &number, &sep) == 2);
 
             if (is_ok) {
-                if ((col < M-1 && sep != ' ')) {
+                if ((col < M - 1 && sep != ' ')) {
                     is_ok = 0;
-                } else if (col == M-1 && sep != '\n') {
+                } else if (col == M - 1 && sep != '\n') {
                     is_ok = 0;
                 }
-           
+
                 if (is_ok && number == 1) {
                     field[row][col] = LIVE;
-                    counter++;
                 } else if (is_ok && number == 0) {
                     field[row][col] = DIED;
-                    counter++;
                 } else {
                     is_ok = 0;
                 }
             }
-
         }
     }
 
@@ -162,14 +164,14 @@ void copy_field(char dst[][M], const char src[][M]) {
 void start_game(char field[][M]) {
     char prev_field[N][M];
     int key_pressed = -1;
-    int gameover = 0;
+    _Bool gameover = 0;
     int game_delay = PRINT_DELAY;
 
     init_ncurses();
 
     print_field(field);
     printw("\t\t\t\tPress any Key to Start...");
-    pause_game();
+    pause_game(game_delay);
 
     while (key_pressed != 'q' && key_pressed != 'Q' && !gameover) {
         clear();
@@ -194,7 +196,7 @@ void start_game(char field[][M]) {
         print_field(field);
 
         printw("\t\t\t\tGAME OVER");
-        pause_game();
+        pause_game(game_delay);
     }
 
     endwin();
@@ -203,19 +205,19 @@ void start_game(char field[][M]) {
 int game_speed_control(int game_delay, int key_pressed) {
     switch (key_pressed) {
         case '1':
-            game_delay -= 100;
+            game_delay = 300;
             break;
         case '2':
-            game_delay -= 150;
+            game_delay = 200;
             break;
         case '3':
-            game_delay -= 200;
+            game_delay = 100;
             break;
         case '4':
-            game_delay -= 290;
+            game_delay = 50;
             break;
         case ' ':
-            game_delay = -1;
+            pause_game(game_delay);
             break;
     }
     return game_delay;
