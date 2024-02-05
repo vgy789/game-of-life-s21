@@ -173,27 +173,30 @@ int init_field(char field[][M]) {
     }
 
     float number;
-    int is_ok = 1;
+    int is_ok = 1, counter = 0;
     char sep;
     for (int row = 0; row < N && is_ok; row++) {
         for (int col = 0; col < M && is_ok; col++) {
-            // is_ok = (scanf("%f%c", &number, &sep) == 2);
+            is_ok = (scanf("%f%c", &number, &sep) == 2);
 
-            // if (is_ok) {
-            //     if ((col < M-1 && sep != ' ')) {
-            //         is_ok = 0;
-            //     } else if (col == M-1 && sep != '\n') {
-            //         is_ok = 0;
-            //     }
+            if (is_ok) {
+                if ((col < M-1 && sep != ' ')) {
+                    is_ok = 0;
+                } else if (col == M-1 && sep != '\n') {
+                    is_ok = 0;
+                }
            
-            //     if (is_ok && number == 1) {
-            //         field[row][col] = LIVE;
-            //     } else if (is_ok && number == 0) {
-            //         field[row][col] = DIED;
-            //     } else {
-            //         is_ok = 0;
-            //     }
-            // }
+                if (is_ok && number == 1) {
+                    field[row][col] = LIVE;
+                    counter++;
+                } else if (is_ok && number == 0) {
+                    field[row][col] = DIED;
+                    counter++;
+                } else {
+                    is_ok = 0;
+                }
+            }
+
         }
     }
 
