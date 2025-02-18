@@ -9,6 +9,8 @@
 
 #define PRINT_DELAY (100)
 
+void start_game(char field[][M]);
+
 int main(void) {
     char field[N][M];
     _Bool is_loaded = init_field(field);
